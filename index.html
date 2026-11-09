@@ -611,7 +611,19 @@
           <button data-value="0.85">보통</button>
           <button data-value="1.1">빠르게</button>
         </div>
-        <label class="setting-label" for="set-voice-select">목소리</label>
+        <p class="setting-label">목소리 종류</p>
+        <div class="segmented" id="set-gender">
+          <button data-value="female">여성</button>
+          <button data-value="male">남성</button>
+          <button data-value="auto">자동</button>
+        </div>
+        <p class="setting-label">목소리 높낮이</p>
+        <div class="segmented" id="set-pitch">
+          <button data-value="0.85">낮게</button>
+          <button data-value="1">보통</button>
+          <button data-value="1.2">높게</button>
+        </div>
+        <label class="setting-label" for="set-voice-select">목소리 직접 고르기</label>
         <select id="set-voice-select" class="select"><option value="">자동으로 고르기</option></select>
         <div class="voice-status">
           <p class="small" id="set-voice">음성 확인 중…</p>
@@ -631,6 +643,17 @@
             <button class="switch" role="switch" data-setting="autoSpeak" aria-label="카드를 뒤집으면 바로 소리 듣기"></button>
           </div>
         </div>
+        <details class="help">
+          <summary>여자 목소리로 바꾸는 법 (갤럭시)</summary>
+          <p class="small">안드로이드 브라우저(크롬·삼성 인터넷)는 보통 <strong>휴대폰 설정에서 고른 목소리</strong>를 그대로 써요. 앱 안의 목록에 목소리가 하나만 보이면 휴대폰 설정에서 바꿔 주세요.</p>
+          <ul>
+            <li><strong>Google 음성 엔진</strong>: 설정 › 일반 › 텍스트 음성 변환(TTS) › 기본 엔진을 "Google 음성 인식 및 합성"으로 › 옆의 ⚙ › 음성 데이터 설치 › <strong>일본어</strong> › 여러 목소리 중 마음에 드는 목소리(여성)를 골라요.</li>
+            <li><strong>삼성 TTS</strong>: 같은 메뉴에서 기본 엔진을 "삼성 TTS"로 › ⚙ › 일본어 목소리를 골라요.</li>
+            <li>바꾼 뒤 앱을 껐다 켜고 "소리 테스트"를 눌러 보세요.</li>
+            <li>마음에 드는 목소리가 없으면 "목소리 높낮이"를 <strong>높게</strong>로 하면 조금 더 밝은 목소리가 돼요.</li>
+          </ul>
+          <p class="muted small">메뉴 이름은 One UI 버전에 따라 조금 다를 수 있어요.</p>
+        </details>
         <details class="help">
           <summary>소리가 안 나와요</summary>
           <ul>
@@ -682,7 +705,7 @@
         <button class="btn btn-danger btn-block" id="set-reset">모든 기록 지우기</button>
       </div>
 
-      <p class="footnote muted small">하루가나 v4 · 글자 208자 · N5 단어 <span id="st-vocab-n"></span>개<br>기록은 이 브라우저에만 저장돼요.</p>
+      <p class="footnote muted small">하루가나 v5 · 글자 208자 · N5 단어 <span id="st-vocab-n"></span>개<br>기록은 이 브라우저에만 저장돼요.</p>
     </section>
 
     <!-- =================== 6-0. 발음 규칙 미니 강의 =================== -->

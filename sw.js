@@ -6,7 +6,7 @@
    ★ 앱 파일을 고쳤다면 아래 VERSION 숫자를 올려 주세요.
      그래야 휴대폰이 새 파일을 다시 받아요.
    ========================================================= */
-const VERSION = 'harukana-v4';
+const VERSION = 'harukana-v5';
 const FONT_CACHE = 'harukana-fonts';
 const APP_FILES = [
   './',

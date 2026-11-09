@@ -81,7 +81,7 @@ python -m http.server 8000
 - 단어: `vocab-data.js` 에 `['単語', 'たんご', '단어', '단어', 1],` 처럼 한 줄 추가
   (4번째는 한국어 한자어, 5번째 `1`은 "한국어와 비슷해요" 표시)
 - 영상: `videos-data.js` 에 `{ id: '영상ID', title: '제목', channel: '채널' },` 한 줄 추가
-- 추가한 뒤 `sw.js` 맨 위 `VERSION` 숫자를 올려 주세요. (예: `harukana-v5`)
+- 추가한 뒤 `sw.js` 맨 위 `VERSION` 숫자를 올려 주세요. (예: `harukana-v6`)
 
 ## 고친 내용이 반영되지 않을 때
 서비스 워커가 옛 파일을 저장해 두고 있어서 그래요. `sw.js`의 `VERSION`을 올리거나, 크롬에서 `Ctrl + Shift + R`.

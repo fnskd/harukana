@@ -82,7 +82,7 @@ const STORE_KEY = 'harukana:v1';
 
 function defaultState() {
   return {
-    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, petals: true, voice: '' },
+    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, petals: true, voice: '', voiceGender: 'female', pitch: 1 },
     prefs: {
       table: 'h',
       practiceTab: 'cards',
@@ -333,6 +333,16 @@ function toKoPron(str) {
 }
 
 /* ---------- 5. 소리 ---------- */
+// 목소리 이름으로 여성/남성을 짐작해요 (기기마다 이름이 달라서, 모르는 이름은 표시하지 않아요)
+const FEMALE_VOICES = /kyoko|haruka|ayumi|nanami|sayaka|mizuki|aoi|mayu|shiori|o-?ren|hikari|kaori|naomi|google\s*日本語/i;
+const MALE_VOICES = /otoya|hattori|ichiro|keita|daichi|naoki|takumi|kenji|kazuki/i;
+function voiceGender(v) {
+  if (FEMALE_VOICES.test(v.name)) return 'female';
+  if (MALE_VOICES.test(v.name)) return 'male';
+  return '';
+}
+const GENDER_LABEL = { female: '여성', male: '남성' };
+
 const Speech = {
   supported: 'speechSynthesis' in window,
   voices: [], voice: null, loaded: false, warned: false,
@@ -352,11 +362,15 @@ const Speech = {
     setTimeout(() => { if (!this.loaded) { this.loaded = true; renderVoiceStatus(); } }, 2500);
   },
   choose() {
-    const want = state.settings.voice;
+    const want = state.settings.voice;            // 목록에서 직접 고른 목소리가 먼저
+    const g = state.settings.voiceGender;         // 그다음 여성/남성 선호
+    const byGender = g === 'auto' ? [] : this.voices.filter(v => voiceGender(v) === g);
     this.voice = (want && this.voices.find(v => v.voiceURI === want))
+      || byGender.find(v => v.localService) || byGender[0]
       || this.voices.find(v => v.lang === 'ja-JP' && v.localService)
       || this.voices.find(v => v.lang === 'ja-JP')
       || this.voices[0] || null;
+    this.genderMatched = !!this.voice && (g === 'auto' || voiceGender(this.voice) === g);
   },
   speak(text, delay = 0) {
     if (!this.supported) { toast('이 브라우저는 소리 기능을 지원하지 않아요'); return; }
@@ -364,6 +378,7 @@ const Speech = {
     u.lang = 'ja-JP';
     if (this.voice) u.voice = this.voice;
     u.rate = state.settings.rate;
+    u.pitch = state.settings.pitch;               // 목소리 높낮이 (1 = 원래 목소리)
     const go = () => speechSynthesis.speak(u);
     if (speechSynthesis.speaking || speechSynthesis.pending) {
       speechSynthesis.cancel();
@@ -1563,6 +1578,8 @@ function paintSettings() {
   presets.forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === s.goal)));
   $('#set-goal-custom').value = presets.some(b => Number(b.dataset.value) === s.goal) ? '' : s.goal;
   $$('#set-rate button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === s.rate)));
+  $$('#set-gender button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.value === s.voiceGender)));
+  $$('#set-pitch button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === s.pitch)));
   $$('#set-theme button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.value === s.theme)));
   $$('.switch[data-setting]').forEach(b => b.setAttribute('aria-checked', String(!!s[b.dataset.setting])));
 }
@@ -1581,6 +1598,24 @@ $('#set-rate').addEventListener('click', e => {
   state.settings.rate = Number(b.dataset.value);
   save(); paintSettings();
   Speech.speak('あいうえお');
+});
+$('#set-gender').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.settings.voiceGender = b.dataset.value;
+  state.settings.voice = '';                      // 종류를 바꾸면 목록 선택은 "자동"으로
+  save(); Speech.choose(); renderVoiceStatus(); paintSettings();
+  Speech.speak('こんにちは');
+  if (b.dataset.value !== 'auto' && !Speech.genderMatched) {
+    toast(`이 기기에서는 ${GENDER_LABEL[b.dataset.value]} 일본어 목소리를 찾지 못했어요. 아래 "여자 목소리로 바꾸는 법"을 봐 주세요`);
+  }
+});
+$('#set-pitch').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.settings.pitch = Number(b.dataset.value);
+  save(); paintSettings();
+  Speech.speak('こんにちは');
 });
 $$('.switch[data-setting]').forEach(b => b.addEventListener('click', () => {
   const key = b.dataset.setting;
@@ -1612,11 +1647,18 @@ function renderVoiceStatus() {
   const el = $('#set-voice');
   const sel = $('#set-voice-select');
   sel.innerHTML = '<option value="">자동으로 고르기</option>' +
-    Speech.voices.map(v => `<option value="${escapeHtml(v.voiceURI)}">${escapeHtml(v.name)}</option>`).join('');
+    Speech.voices.map(v => {
+      const g = voiceGender(v);
+      return `<option value="${escapeHtml(v.voiceURI)}">${escapeHtml(v.name)}${g ? ` (${GENDER_LABEL[g]})` : ''}</option>`;
+    }).join('');
   sel.value = Speech.voices.some(v => v.voiceURI === state.settings.voice) ? state.settings.voice : '';
   sel.disabled = Speech.voices.length < 2;
   if (!Speech.supported) el.textContent = '이 브라우저는 소리 기능이 없어요. 크롬이나 사파리를 써 보세요.';
-  else if (Speech.voice) el.textContent = `지금 목소리: ${Speech.voice.name}`;
+  else if (Speech.voice) {
+    const g = voiceGender(Speech.voice);
+    el.textContent = `지금 목소리: ${Speech.voice.name}${g ? ` (${GENDER_LABEL[g]})` : ''}` +
+      (Speech.voices.length < 2 ? ' · 이 기기에서는 휴대폰 설정의 목소리를 그대로 써요' : '');
+  }
   else if (Speech.loaded) el.textContent = '일본어 음성을 찾지 못했어요. 그래도 소리가 날 수 있으니 테스트해 보세요.';
   else el.textContent = '음성 확인 중…';
 }
