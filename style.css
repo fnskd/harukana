@@ -1,28 +1,40 @@
 /* =========================================================
    style.css — 하루가나 디자인
-   콘셉트: "한지와 도장" — 미색 종이, 먹색 글씨, 주홍색 도장
+   콘셉트: "사쿠라" — 연분홍 하늘, 반투명 유리 카드, 진분홍 도장
    ---------------------------------------------------------
    색은 맨 위 :root 에 이름을 붙여 모아 두었어요.
    여기 숫자만 바꾸면 앱 전체 색이 바뀌어요.
+   (--shu 는 원래 "주홍"이라는 뜻이었는데, 지금은 강조 색(진분홍)이에요)
    ========================================================= */
 
-/* ---------- 1. 색과 크기 (밝은 화면) ---------- */
+/* ---------- 1. 색과 크기 (밝은 화면: 봄날 사쿠라) ---------- */
 :root {
-  --paper:      #F6F1E7;   /* 배경: 한지 */
-  --surface:    #FFFDF8;   /* 카드 */
-  --surface-2:  #EFE8DA;   /* 눌린 칸, 트랙 */
-  --line:       #E2D8C6;   /* 테두리 */
-  --ink:        #1F1B16;   /* 기본 글씨: 먹 */
-  --ink-2:      #5C544A;   /* 보조 글씨 */
-  --ink-3:      #6F6659;   /* 흐린 글씨 */
-  --shu:        #C8402A;   /* 주홍(도장) — 강조 색 */
-  --shu-ink:    #FFFFFF;   /* 주홍 위 글씨 */
-  --shu-soft:   #F6DCD3;   /* 연한 주홍 */
-  --good:       #3F7A45;   /* 정답 */
-  --good-soft:  #DCEBD7;
-  --bad:        #B3261E;   /* 오답 */
-  --bad-soft:   #F7D9D5;
-  --shadow:     0 1px 2px rgba(60, 40, 20, .06), 0 6px 20px rgba(60, 40, 20, .07);
+  --bg:         #FFF2F6;                    /* 바탕색 */
+  --bg-image:                               /* 바탕 그라데이션: 벚꽃빛 하늘 */
+    radial-gradient(120% 70% at 0% 0%, rgba(255, 196, 216, .75), transparent 60%),
+    radial-gradient(90% 60% at 100% 15%, rgba(255, 222, 233, .9), transparent 60%),
+    radial-gradient(100% 70% at 85% 100%, rgba(240, 210, 245, .7), transparent 60%),
+    linear-gradient(170deg, #FFF6F9 0%, #FDE8EF 55%, #F9EAF6 100%);
+  --paper:      rgba(255, 255, 255, .55);   /* 카드 안쪽 칸 (반투명) */
+  --surface:    rgba(255, 255, 255, .62);   /* 유리 카드 (반투명) */
+  --surface-solid: #FFFAFC;                 /* 꼭 불투명해야 하는 곳 (확인 창 등) */
+  --surface-2:  rgba(236, 170, 194, .22);   /* 트랙, 눌린 칸 */
+  --line:       rgba(214, 120, 155, .24);   /* 테두리 */
+  --glass-edge: rgba(255, 255, 255, .7);    /* 유리 윗면의 빛 */
+  --ink:        #3A2530;                    /* 기본 글씨: 짙은 자두색 */
+  --ink-2:      #6B5160;                    /* 보조 글씨 */
+  --ink-3:      #7D6372;                    /* 흐린 글씨 */
+  --shu:        #C92A62;                    /* 강조 색: 진분홍 (도장) */
+  --shu-ink:    #FFFFFF;                    /* 강조 색 위 글씨 */
+  --shu-soft:   rgba(248, 170, 198, .38);   /* 연분홍 */
+  --good:       #2E7A52;                    /* 정답: 새잎 초록 */
+  --good-soft:  rgba(190, 232, 206, .62);
+  --bad:        #B4233C;                    /* 오답 */
+  --bad-soft:   rgba(252, 196, 206, .62);
+  --petal-1:    #FFDCE7;                    /* 꽃잎 */
+  --petal-2:    #F6A9C4;
+  --shadow:     0 1px 2px rgba(150, 50, 90, .06), 0 10px 30px rgba(201, 42, 98, .09);
+  --blur:       blur(16px) saturate(150%);  /* 유리 효과의 흐림 정도 */
   --radius:     18px;
   --radius-sm:  12px;
   --tabbar-h:   72px;
@@ -32,25 +44,39 @@
   color-scheme: light;
 }
 
-/* ---------- 2. 어두운 화면 (다크 모드) ---------- */
+/* ---------- 2. 어두운 화면: 밤벚꽃 ---------- */
 /* "자동"일 때: 휴대폰이 다크 모드면 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #17140F; --surface: #221E18; --surface-2: #2D2820; --line: #3A332A;
-    --ink: #F2EBDD; --ink-2: #C9BFAE; --ink-3: #A39985;
-    --shu: #EA6A4F; --shu-ink: #1A0E0A; --shu-soft: #43261E;
-    --good: #8DC184; --good-soft: #233322; --bad: #F08A7E; --bad-soft: #43221E;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    --bg: #1C1218;
+    --bg-image:
+      radial-gradient(120% 70% at 0% 0%, rgba(150, 50, 95, .35), transparent 60%),
+      radial-gradient(90% 60% at 100% 20%, rgba(110, 50, 120, .3), transparent 60%),
+      linear-gradient(170deg, #22141C 0%, #1C1218 60%, #1A1420 100%);
+    --paper: rgba(255, 220, 232, .06); --surface: rgba(62, 36, 50, .55); --surface-solid: #2A1B24;
+    --surface-2: rgba(255, 182, 206, .1); --line: rgba(255, 182, 206, .16); --glass-edge: rgba(255, 220, 232, .12);
+    --ink: #FBEFF3; --ink-2: #DCC4CE; --ink-3: #B79DAA;
+    --shu: #F27BA3; --shu-ink: #2A0F1A; --shu-soft: rgba(242, 123, 163, .2);
+    --good: #8FD1A9; --good-soft: rgba(80, 160, 110, .2); --bad: #FF8FA0; --bad-soft: rgba(255, 120, 140, .18);
+    --petal-1: #F7B6CB; --petal-2: #C9628A;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.3);
     color-scheme: dark;
   }
 }
 /* 설정에서 "어둡게"를 고른 경우 */
 :root[data-theme="dark"] {
-  --paper: #17140F; --surface: #221E18; --surface-2: #2D2820; --line: #3A332A;
-  --ink: #F2EBDD; --ink-2: #C9BFAE; --ink-3: #A39985;
-  --shu: #EA6A4F; --shu-ink: #1A0E0A; --shu-soft: #43261E;
-  --good: #8DC184; --good-soft: #233322; --bad: #F08A7E; --bad-soft: #43221E;
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  --bg: #1C1218;
+  --bg-image:
+    radial-gradient(120% 70% at 0% 0%, rgba(150, 50, 95, .35), transparent 60%),
+    radial-gradient(90% 60% at 100% 20%, rgba(110, 50, 120, .3), transparent 60%),
+    linear-gradient(170deg, #22141C 0%, #1C1218 60%, #1A1420 100%);
+  --paper: rgba(255, 220, 232, .06); --surface: rgba(62, 36, 50, .55); --surface-solid: #2A1B24;
+  --surface-2: rgba(255, 182, 206, .1); --line: rgba(255, 182, 206, .16); --glass-edge: rgba(255, 220, 232, .12);
+  --ink: #FBEFF3; --ink-2: #DCC4CE; --ink-3: #B79DAA;
+  --shu: #F27BA3; --shu-ink: #2A0F1A; --shu-soft: rgba(242, 123, 163, .2);
+  --good: #8FD1A9; --good-soft: rgba(80, 160, 110, .2); --bad: #FF8FA0; --bad-soft: rgba(255, 120, 140, .18);
+  --petal-1: #F7B6CB; --petal-2: #C9628A;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.3);
   color-scheme: dark;
 }
 
@@ -59,7 +85,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--paper);
+  background-color: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 17px;
@@ -68,11 +94,11 @@ body {
   overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
-  /* 한지 결 느낌 (아주 옅은 무늬) */
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(200, 64, 42, .035), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(120, 90, 50, .04), transparent 45%);
-  background-attachment: fixed;
+}
+/* 바탕 그라데이션은 화면에 고정된 층으로 깔아요 (스크롤해도 그대로) */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: var(--bg-image);
 }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -433,7 +459,7 @@ button { cursor: pointer; }
   transform: translateX(-50%);
   width: max-content; max-width: calc(100% - 32px);
   padding: 13px 18px; border-radius: 14px;
-  background: var(--ink); color: var(--paper); font-size: 15.5px; font-weight: 500;
+  background: var(--ink); color: var(--bg); font-size: 15.5px; font-weight: 500;
   box-shadow: 0 8px 24px rgba(0,0,0,.2);
   animation: pop-in .2s ease;
 }
@@ -441,12 +467,12 @@ button { cursor: pointer; }
   border: 1px solid var(--line); border-radius: 22px; padding: 24px;
   background: var(--surface); color: var(--ink); width: min(360px, calc(100% - 32px));
 }
-.dialog::backdrop { background: rgba(20, 14, 8, .45); }
+.dialog::backdrop { background: rgba(60, 20, 40, .35); backdrop-filter: blur(4px); }
 .dialog .muted { margin-bottom: 4px; }
 .celebrate {
   position: fixed; inset: 0; z-index: 40;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   font-size: 22px; font-weight: 700;
   animation: fade-in .2s ease;
@@ -472,7 +498,7 @@ button { cursor: pointer; }
    ========================================================= */
 
 /* ---------- 17. 공통 작은 부품 ---------- */
-.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 50; background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 10px; }
+.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 50; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; }
 .skip-link:focus { left: 8px; }
 .btn-sm { min-height: 44px; padding: 0 16px; font-size: 16px; border-radius: 12px; }
 .link-btn { background: none; border: 0; padding: 8px 4px; min-height: 40px; color: var(--ink-2); font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
@@ -573,7 +599,7 @@ button { cursor: pointer; }
 /* ---------- 19. 글자표 추가 ---------- */
 .sticky-seg {
   position: sticky; top: calc(env(safe-area-inset-top) + 8px); z-index: 5;
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--paper) 80%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--bg) 60%, transparent);
 }
 .confuse-group { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 10px; }
 .confuse-tiles { display: flex; gap: 8px; margin-bottom: 8px; }
@@ -604,7 +630,7 @@ button { cursor: pointer; }
   flex: none; min-height: 44px; padding: 0 16px; border-radius: 999px; scroll-snap-align: start;
   border: 1.5px solid var(--line); background: var(--surface); font-size: 15.5px; font-weight: 500; white-space: nowrap;
 }
-.chip-scroll button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+.chip-scroll button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
 .chip-scroll button .n { opacity: .65; font-weight: 500; margin-left: 4px; font-size: 13.5px; }
 .vocab-count { margin: 0 0 10px; }
 .word-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
@@ -634,7 +660,7 @@ button { cursor: pointer; }
   position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 10px); z-index: 4;
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   padding: 10px; border-radius: 20px;
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .vocab-actions .btn { min-height: 52px; font-size: 16.5px; padding: 0 10px; }
@@ -920,3 +946,66 @@ button { cursor: pointer; }
   #write-play > .answer-row { grid-column: 2; grid-row: 4; align-self: start; }
   #write-play > .write-note { grid-column: 2; text-align: left; }
 }
+
+
+/* =========================================================
+   사쿠라 테마 — 반투명 유리 카드와 흩날리는 꽃잎
+   ========================================================= */
+:root { --shu-grad: linear-gradient(135deg, #E4508A 0%, #C92A62 100%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shu-grad: linear-gradient(135deg, #F7A3BF 0%, #EC6E98 100%); } }
+:root[data-theme="dark"] { --shu-grad: linear-gradient(135deg, #F7A3BF 0%, #EC6E98 100%); }
+
+/* 유리 효과: 뒤가 은은하게 비치고 흐려 보여요 */
+.card, .stat-tile, .segmented, .search, .flashcard-face, .option, .feedback, .video-card,
+.confuse-group, .write-pad, .mode-cards button, .icon-btn, .btn-secondary, .chips button,
+.chip-scroll button, .today-big, .review-count, .install-card {
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.card, .stat-tile, .flashcard-face, .option, .video-card, .write-pad, .feedback {
+  box-shadow: inset 0 1px 0 var(--glass-edge), var(--shadow);
+}
+.tabbar {
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-top: 1px solid var(--glass-edge);
+  box-shadow: 0 -6px 24px rgba(201, 42, 98, .06);
+}
+.dialog { background: var(--surface-solid); }
+.segmented button[aria-pressed="true"] { background: var(--surface-solid); }
+
+/* 강조 버튼은 벚꽃빛 그라데이션 */
+.btn-primary, .review-card.has-due .btn, .qp-listen { background: var(--shu-grad); }
+.btn-primary { box-shadow: 0 6px 18px color-mix(in srgb, var(--shu) 32%, transparent); }
+.progress-bar > div, .meter > div { background: var(--shu-grad); }
+.week-bar:not(.zero) { background: var(--shu-grad); }
+
+/* 제목 옆 작은 벚꽃 */
+.brand::after {
+  content: ""; display: inline-block; width: .55em; height: .55em; margin-left: .18em; vertical-align: .55em;
+  background: var(--shu);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg transform='translate(12 12)'%3E%3Cpath id='p' d='M0 -2C-3 -5 -3.5 -9 0 -11C3.5 -9 3 -5 0 -2Z'/%3E%3Cuse href='%23p' transform='rotate(72)'/%3E%3Cuse href='%23p' transform='rotate(144)'/%3E%3Cuse href='%23p' transform='rotate(216)'/%3E%3Cuse href='%23p' transform='rotate(288)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg transform='translate(12 12)'%3E%3Cpath id='p' d='M0 -2C-3 -5 -3.5 -9 0 -11C3.5 -9 3 -5 0 -2Z'/%3E%3Cuse href='%23p' transform='rotate(72)'/%3E%3Cuse href='%23p' transform='rotate(144)'/%3E%3Cuse href='%23p' transform='rotate(216)'/%3E%3Cuse href='%23p' transform='rotate(288)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  opacity: .85;
+}
+
+/* 흩날리는 꽃잎 (배경 층, 누르거나 읽는 데 방해되지 않아요) */
+.sakura { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.petal {
+  position: absolute; top: -6vh; left: var(--x);
+  width: var(--s); height: calc(var(--s) * .78);
+  background: linear-gradient(135deg, var(--petal-1) 0%, var(--petal-2) 100%);
+  border-radius: 150% 0 150% 0;
+  opacity: var(--o, .7);
+  animation: petal-fall var(--d) linear var(--delay) infinite;
+  will-change: transform;
+}
+@keyframes petal-fall {
+  0%   { transform: translate3d(0, -8vh, 0) rotate(0deg) rotateY(0deg); }
+  25%  { transform: translate3d(calc(var(--drift) * .4), 24vh, 0) rotate(120deg) rotateY(160deg); }
+  50%  { transform: translate3d(calc(var(--drift) * .1), 52vh, 0) rotate(220deg) rotateY(320deg); }
+  75%  { transform: translate3d(calc(var(--drift) * .7), 80vh, 0) rotate(330deg) rotateY(480deg); }
+  100% { transform: translate3d(var(--drift), 112vh, 0) rotate(440deg) rotateY(640deg); }
+}
+@media (prefers-reduced-motion: reduce) { .sakura { display: none; } }

@@ -82,7 +82,7 @@ const STORE_KEY = 'harukana:v1';
 
 function defaultState() {
   return {
-    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, voice: '' },
+    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, petals: true, voice: '' },
     prefs: {
       table: 'h',
       practiceTab: 'cards',
@@ -1587,6 +1587,7 @@ $$('.switch[data-setting]').forEach(b => b.addEventListener('click', () => {
   state.settings[key] = !state.settings[key];
   save(); paintSettings();
   if (key === 'sfx' && state.settings.sfx) Sfx.play(true);
+  if (key === 'petals') renderPetals();
   if (key === 'vibrate' && state.settings.vibrate) buzz();
 }));
 
@@ -1596,7 +1597,7 @@ function applyTheme() {
   else document.documentElement.setAttribute('data-theme', t);
   $$('meta[name="theme-color"]').forEach(m => {
     const darkMeta = m.media.includes('dark');
-    m.content = t === 'auto' ? (darkMeta ? '#17140F' : '#F6F1E7') : (t === 'dark' ? '#17140F' : '#F6F1E7');
+    m.content = t === 'auto' ? (darkMeta ? '#1C1218' : '#FDE8EF') : (t === 'dark' ? '#1C1218' : '#FDE8EF');
   });
 }
 $('#set-theme').addEventListener('click', e => {
@@ -1737,8 +1738,22 @@ $('#install-close').addEventListener('click', () => {
   toast('나중에 설치하고 싶으면 브라우저 메뉴의 "홈 화면에 추가"를 써 주세요');
 });
 
+// 배경에 흩날리는 벚꽃잎 (설정에서 끌 수 있어요)
+function renderPetals() {
+  const layer = $('#sakura');
+  if (!state.settings.petals) { layer.innerHTML = ''; return; }
+  const count = window.innerWidth < 600 ? 9 : 14;
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const r = (a, b) => a + Math.random() * (b - a);
+    html += `<span class="petal" style="--x:${r(0, 100).toFixed(1)}%;--s:${r(9, 17).toFixed(1)}px;--d:${r(11, 20).toFixed(1)}s;--delay:${(-r(0, 20)).toFixed(1)}s;--drift:${r(-90, 90).toFixed(0)}px;--o:${r(.45, .8).toFixed(2)}"></span>`;
+  }
+  layer.innerHTML = html;
+}
+
 // 시작!
 applyTheme();
+renderPetals();
 Speech.init();
 Practice.showSetup();
 showView(location.hash.slice(1) || 'home');
