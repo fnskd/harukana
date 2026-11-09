@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 밝은 화면: 앱이 열리는 순간에도 하얀 화면 대신 벚꽃색이 보여요 -->
+    <style name="Theme.Harukana" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/sakura_bg</item>
+        <item name="android:statusBarColor">@color/sakura_bar</item>
+        <item name="android:navigationBarColor">@color/sakura_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <color name="sakura_bg">#FFF2F6</color>
+    <color name="sakura_bar">#FDE8EF</color>
+    <color name="icon_bg">#FDE3EC</color>
+    <color name="night_bg">#1C1218</color>
+</resources>

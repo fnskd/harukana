@@ -21,6 +21,8 @@
 'use strict';
 
 /* ---------- 1. 작은 도우미 함수 ---------- */
+// 안드로이드 앱(APK) 안에서 열리면, 앱이 HarukanaAndroid 라는 연결 통로를 넣어 줘요
+const ANDROID = window.HarukanaAndroid || null;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const GROUP_ORDER = ['basic', 'dakuten', 'yoon'];
@@ -372,6 +374,7 @@ const Speech = {
   voices: [], voice: null, loaded: false, warned: false,
 
   init() {
+    if (ANDROID) { this.native = true; this.loaded = true; renderVoiceStatus(); return; }
     if (!this.supported) { this.loaded = true; renderVoiceStatus(); return; }
     const pick = () => {
       const all = speechSynthesis.getVoices();
@@ -403,6 +406,11 @@ const Speech = {
     this.tts(text, delay);
   },
   tts(text, delay = 0) {
+    if (this.native) {   // 안드로이드 앱: 휴대폰 음성으로 바로 읽어요
+      const say = () => ANDROID.speak(text, state.settings.rate / 0.85, state.settings.pitch);
+      if (delay) setTimeout(say, delay); else say();
+      return;
+    }
     if (!this.supported) { toast('이 브라우저는 소리 기능을 지원하지 않아요'); return; }
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
@@ -449,7 +457,9 @@ const Sfx = {
   },
 };
 function buzz() {
-  if (state.settings.vibrate && navigator.vibrate) navigator.vibrate(120);
+  if (!state.settings.vibrate) return;
+  if (ANDROID) ANDROID.vibrate(120);
+  else if (navigator.vibrate) navigator.vibrate(120);
 }
 
 /* ---------- 6. 화면 전환 ---------- */
@@ -1614,6 +1624,12 @@ function paintSettings() {
   $$('#set-theme button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.value === s.theme)));
   $$('.switch[data-setting]').forEach(b => b.setAttribute('aria-checked', String(!!s[b.dataset.setting])));
   $('#pack-box').hidden = !PACK;
+  if (ANDROID) {   // 앱에서는 목소리를 휴대폰 설정에서 고르고, 소리 파일은 이미 앱 안에 있어요
+    for (const id of ['#set-gender', '#set-voice-select']) {
+      $(id).hidden = true;
+      $(id).previousElementSibling.hidden = true;
+    }
+  }
   $('#pack-tts-note').hidden = !PACK || !s.voicePack;
 }
 function setGoal(n) {
@@ -1688,6 +1704,7 @@ function renderVoiceStatus() {
   sel.value = Speech.voices.some(v => v.voiceURI === state.settings.voice) ? state.settings.voice : '';
   sel.disabled = Speech.voices.length < 2;
   if (PACK && state.settings.voicePack) el.textContent = `지금 목소리: ${PACK.credit} (캐릭터 목소리)`;
+  else if (ANDROID) el.textContent = '지금 목소리: 휴대폰 음성 (설정 › 일반 › 텍스트 음성 변환에서 바꿀 수 있어요)';
   else if (!Speech.supported) el.textContent = '이 브라우저는 소리 기능이 없어요. 크롬이나 사파리를 써 보세요.';
   else if (Speech.voice) {
     const g = voiceGender(Speech.voice);
@@ -1716,7 +1733,7 @@ function packFiles() { return PACK ? [...new Set([...Object.values(PACK.ids), ..
 async function renderPackStatus() {
   if (!PACK) return;
   const btn = $('#pack-download');
-  if (!('caches' in window)) { btn.hidden = true; return; }
+  if (ANDROID || !('caches' in window)) { btn.hidden = true; return; }   // 앱에는 소리 파일이 이미 들어 있어요
   const files = packFiles();
   const n = await packCachedCount(files);
   btn.textContent = n >= files.length ? '인터넷 없이 들을 준비 완료 ✓'
@@ -1753,6 +1770,11 @@ if (PACK) {
 // 백업: 기록을 파일로 저장하고 불러오기
 $('#backup-export').addEventListener('click', () => {
   const data = { app: 'harukana', version: 2, exportedAt: new Date().toISOString(), state };
+  if (ANDROID) {
+    ANDROID.shareFile(`harukana-backup-${dateKey()}.json`, JSON.stringify(data, null, 1));
+    toast('저장할 곳(내 파일, 드라이브 등)을 골라 주세요');
+    return;
+  }
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1829,7 +1851,7 @@ const isSamsungBrowser = () => /SamsungBrowser/i.test(navigator.userAgent);
 
 function renderInstall() {
   const manual = !installPrompt && (isIOS() || isSamsungBrowser());   // 버튼 대신 방법을 안내해요
-  const show = !isStandalone() && !state.prefs.installClosed && (installPrompt || manual);
+  const show = !ANDROID && !isStandalone() && !state.prefs.installClosed && (installPrompt || manual);
   $('#install-card').hidden = !show;
   if (!show) return;
   $('#install-btn').hidden = manual;
@@ -1887,7 +1909,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 서비스 워커: 인터넷 없이도 열리고, 새 버전이 나오면 알려줘요
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+if (!ANDROID && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').then(reg => {

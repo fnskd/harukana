@@ -1,0 +1,65 @@
+plugins {
+    id 'com.android.application'
+}
+
+// 앱 버전: 웹앱을 고칠 때마다 숫자를 올려 주세요 (versionCode 는 반드시 이전보다 커야 업데이트가 돼요)
+def appVersionCode = 7
+def appVersionName = '1.7'
+
+android {
+    namespace 'io.github.fnskd.harukana'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.fnskd.harukana'
+        minSdk 26          // 안드로이드 8 이상
+        targetSdk 34
+        versionCode appVersionCode
+        versionName appVersionName
+    }
+
+    // 서명 키: 같은 키로 서명해야 기존 앱 위에 업데이트로 설치돼요 (기록이 지워지지 않아요)
+    // 비밀번호는 저장소에 넣지 않고, 빌드할 때 HARUKANA_KEYSTORE_PASSWORD 로 넘겨요.
+    signingConfigs {
+        release {
+            storeFile file('../harukana-release.jks')
+            storePassword System.getenv('HARUKANA_KEYSTORE_PASSWORD') ?: ''
+            keyAlias 'harukana'
+            keyPassword System.getenv('HARUKANA_KEYSTORE_PASSWORD') ?: ''
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            // 빌드할 때 웹앱 파일을 복사해 넣는 폴더
+            assets.srcDirs += [layout.buildDirectory.dir('webassets').get().asFile]
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.core:core:1.13.1'
+}
+
+// 저장소 맨 위의 웹앱 파일(index.html, app.js, 소리 파일 등)을 APK 안에 넣어요
+tasks.register('copyWeb', Sync) {
+    from(rootProject.file('..')) {
+        include '*.html', '*.js', '*.css', 'manifest.json', 'icons/**', 'audio/**'
+        exclude 'sw.js'
+    }
+    into layout.buildDirectory.dir('webassets/www')
+}
+preBuild.dependsOn 'copyWeb'

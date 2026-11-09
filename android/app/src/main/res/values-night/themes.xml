@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 휴대폰이 다크 모드일 때: 밤벚꽃 색 (웹앱도 자동으로 어두운 화면이 돼요) -->
+    <style name="Theme.Harukana" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/night_bg</item>
+        <item name="android:statusBarColor">@color/night_bg</item>
+        <item name="android:navigationBarColor">@color/night_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

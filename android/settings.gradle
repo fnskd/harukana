@@ -1,0 +1,18 @@
+// 하루가나 안드로이드 앱 (웹 파일을 그대로 품은 WebView 앱)
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+rootProject.name = "Harukana"
+include ':app'

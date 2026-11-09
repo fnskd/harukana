@@ -6,7 +6,7 @@
    ★ 앱 파일을 고쳤다면 아래 VERSION 숫자를 올려 주세요.
      그래야 휴대폰이 새 파일을 다시 받아요.
    ========================================================= */
-const VERSION = 'harukana-v6';
+const VERSION = 'harukana-v7';
 const AUDIO_CACHE = 'harukana-audio';   // 캐릭터 목소리 파일 (버전이 바뀌어도 지우지 않아요)
 const FONT_CACHE = 'harukana-fonts';
 const APP_FILES = [
