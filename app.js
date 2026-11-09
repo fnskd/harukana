@@ -82,7 +82,7 @@ const STORE_KEY = 'harukana:v1';
 
 function defaultState() {
   return {
-    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, petals: true, voice: '', voiceGender: 'female', pitch: 1 },
+    settings: { goal: 20, rate: 0.85, theme: 'auto', sfx: true, vibrate: true, autoSpeak: true, furigana: true, petals: true, voice: '', voiceGender: 'female', pitch: 1, voicePack: true },
     prefs: {
       table: 'h',
       practiceTab: 'cards',
@@ -343,6 +343,30 @@ function voiceGender(v) {
 }
 const GENDER_LABEL = { female: '여성', male: '남성' };
 
+// 캐릭터 목소리 소리 파일 (audio/index.js 가 있으면 써요)
+const PACK = typeof AUDIO_PACK !== 'undefined' ? AUDIO_PACK : null;
+function packFile(id, text) {
+  if (!PACK || !state.settings.voicePack) return null;
+  const f = (id && PACK.ids[id]) || PACK.texts[text];
+  return f ? `audio/${f}` : null;
+}
+const Player = {
+  el: null,
+  play(file, delay, text) {
+    const go = () => {
+      if (Speech.supported) speechSynthesis.cancel();
+      if (!this.el) this.el = new Audio();
+      const a = this.el;
+      a.pause();
+      a.src = file;
+      a.preservesPitch = true;
+      a.playbackRate = Math.max(0.5, Math.min(2, state.settings.rate / 0.85));   // "보통" 빠르기 = 원래 속도
+      a.play().catch(() => Speech.tts(text, 0));   // 재생이 안 되면 휴대폰 음성으로
+    };
+    if (delay) setTimeout(go, delay); else go();
+  },
+};
+
 const Speech = {
   supported: 'speechSynthesis' in window,
   voices: [], voice: null, loaded: false, warned: false,
@@ -372,7 +396,13 @@ const Speech = {
       || this.voices[0] || null;
     this.genderMatched = !!this.voice && (g === 'auto' || voiceGender(this.voice) === g);
   },
-  speak(text, delay = 0) {
+  // 캐릭터 목소리 파일이 있으면 그걸, 없으면 휴대폰 음성(TTS)으로 읽어요
+  speak(text, delay = 0, id) {
+    const file = packFile(id, text);
+    if (file) { Player.play(file, delay, text); return; }
+    this.tts(text, delay);
+  },
+  tts(text, delay = 0) {
     if (!this.supported) { toast('이 브라우저는 소리 기능을 지원하지 않아요'); return; }
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
@@ -391,7 +421,7 @@ const Speech = {
     }
   },
 };
-const speakId = (id, delay) => Speech.speak(speakTextOf(id), delay);
+const speakId = (id, delay) => Speech.speak(speakTextOf(id), delay, id);
 
 // 정답·오답 효과음 (파일 없이 브라우저가 직접 소리를 만들어요)
 const Sfx = {
@@ -1544,6 +1574,7 @@ renderers.stats = function renderStats() {
   $('#st-weak-words').hidden = !weakList('word').length;
 
   paintSettings();
+  renderPackStatus();
 };
 
 function renderCalendar() {
@@ -1582,6 +1613,8 @@ function paintSettings() {
   $$('#set-pitch button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === s.pitch)));
   $$('#set-theme button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.value === s.theme)));
   $$('.switch[data-setting]').forEach(b => b.setAttribute('aria-checked', String(!!s[b.dataset.setting])));
+  $('#pack-box').hidden = !PACK;
+  $('#pack-tts-note').hidden = !PACK || !s.voicePack;
 }
 function setGoal(n) {
   n = Math.round(Number(n));
@@ -1623,6 +1656,7 @@ $$('.switch[data-setting]').forEach(b => b.addEventListener('click', () => {
   save(); paintSettings();
   if (key === 'sfx' && state.settings.sfx) Sfx.play(true);
   if (key === 'petals') renderPetals();
+  if (key === 'voicePack') { renderVoiceStatus(); Speech.speak('こんにちは'); }
   if (key === 'vibrate' && state.settings.vibrate) buzz();
 }));
 
@@ -1653,7 +1687,8 @@ function renderVoiceStatus() {
     }).join('');
   sel.value = Speech.voices.some(v => v.voiceURI === state.settings.voice) ? state.settings.voice : '';
   sel.disabled = Speech.voices.length < 2;
-  if (!Speech.supported) el.textContent = '이 브라우저는 소리 기능이 없어요. 크롬이나 사파리를 써 보세요.';
+  if (PACK && state.settings.voicePack) el.textContent = `지금 목소리: ${PACK.credit} (캐릭터 목소리)`;
+  else if (!Speech.supported) el.textContent = '이 브라우저는 소리 기능이 없어요. 크롬이나 사파리를 써 보세요.';
   else if (Speech.voice) {
     const g = voiceGender(Speech.voice);
     el.textContent = `지금 목소리: ${Speech.voice.name}${g ? ` (${GENDER_LABEL[g]})` : ''}` +
@@ -1668,6 +1703,52 @@ $('#set-voice-select').addEventListener('change', e => {
   Speech.speak('こんにちは');
 });
 $('#set-voice-test').addEventListener('click', () => Speech.speak('こんにちは'));
+
+// 캐릭터 목소리 파일을 한 번에 받아 두기 (인터넷 없이 듣기)
+const AUDIO_CACHE = 'harukana-audio';
+async function packCachedCount(files) {
+  if (!('caches' in window)) return 0;
+  const cache = await caches.open(AUDIO_CACHE);
+  const keys = new Set((await cache.keys()).map(r => new URL(r.url).pathname.split('/audio/')[1]));
+  return files.filter(f => keys.has(f)).length;
+}
+function packFiles() { return PACK ? [...new Set([...Object.values(PACK.ids), ...Object.values(PACK.texts)])] : []; }
+async function renderPackStatus() {
+  if (!PACK) return;
+  const btn = $('#pack-download');
+  if (!('caches' in window)) { btn.hidden = true; return; }
+  const files = packFiles();
+  const n = await packCachedCount(files);
+  btn.textContent = n >= files.length ? '인터넷 없이 들을 준비 완료 ✓'
+    : `인터넷 없이 듣도록 미리 받기 (${(PACK.bytes / 1e6).toFixed(1)}MB${n ? `, ${Math.round(n / files.length * 100)}% 받음` : ''})`;
+}
+if (PACK) {
+  $('#pack-credit').textContent = ` · 음성: ${PACK.credit}`;
+  $('#pack-desc').textContent = `${PACK.credit} 목소리로 미리 만든 발음을 들려줘요`;
+  $('#pack-download').addEventListener('click', async e => {
+    const btn = e.currentTarget;
+    const files = packFiles();
+    const cache = await caches.open(AUDIO_CACHE);
+    btn.disabled = true;
+    let done = 0, failed = 0;
+    for (let i = 0; i < files.length; i += 12) {
+      await Promise.all(files.slice(i, i + 12).map(async f => {
+        const url = `audio/${f}`;
+        try {
+          if (!(await cache.match(url))) {
+            const r = await fetch(url);
+            if (r.ok) await cache.put(url, r); else failed++;
+          }
+        } catch (err) { failed++; }
+        done++;
+      }));
+      btn.textContent = `받는 중… ${Math.round(done / files.length * 100)}%`;
+    }
+    btn.disabled = false;
+    await renderPackStatus();
+    toast(failed ? `일부(${failed}개)를 받지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요` : '소리를 모두 받았어요. 이제 인터넷 없이도 들을 수 있어요');
+  });
+}
 
 // 백업: 기록을 파일로 저장하고 불러오기
 $('#backup-export').addEventListener('click', () => {

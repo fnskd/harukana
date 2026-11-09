@@ -6,7 +6,8 @@
    ★ 앱 파일을 고쳤다면 아래 VERSION 숫자를 올려 주세요.
      그래야 휴대폰이 새 파일을 다시 받아요.
    ========================================================= */
-const VERSION = 'harukana-v5';
+const VERSION = 'harukana-v6';
+const AUDIO_CACHE = 'harukana-audio';   // 캐릭터 목소리 파일 (버전이 바뀌어도 지우지 않아요)
 const FONT_CACHE = 'harukana-fonts';
 const APP_FILES = [
   './',
@@ -17,6 +18,7 @@ const APP_FILES = [
   './vocab-data.js',
   './videos-data.js',
   './lessons-data.js',
+  './audio/index.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -32,7 +34,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== FONT_CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== FONT_CACHE && k !== AUDIO_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -55,6 +57,20 @@ self.addEventListener('fetch', event => {
         } catch (e) {
           return new Response('', { status: 504 });   // 오프라인: 기본 글꼴로 보여요
         }
+      })
+    );
+    return;
+  }
+
+  // 캐릭터 목소리 파일: 한 번 들으면 저장해 두고 다음부터는 바로 재생해요
+  if (url.origin === self.location.origin && url.pathname.includes('/audio/') && url.pathname.endsWith('.mp3')) {
+    event.respondWith(
+      caches.open(AUDIO_CACHE).then(async cache => {
+        const hit = await cache.match(req);
+        if (hit) return hit;
+        const res = await fetch(req);
+        if (res.ok) cache.put(req, res.clone());
+        return res;
       })
     );
     return;
