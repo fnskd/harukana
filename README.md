@@ -124,3 +124,7 @@ python -m http.server 8000
 
 ## 유튜브 강의
 `videos-data.js`의 영상은 2026년 11월에 실제로 있는 것을 확인했어요. 영상의 권리는 각 채널에 있어요.
+
+## 덤: 마리안 웨딩 갤럭시 테마 키트
+`galaxy-theme/` 폴더에 S26 울트라용 갤럭시 테마 재료를 만드는 페이지가 있어요 (배경 2장, 아이콘 25개, 색상표).
+자세한 내용은 [galaxy-theme/README.md](galaxy-theme/README.md)를 봐 주세요.
