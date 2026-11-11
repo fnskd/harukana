@@ -100,7 +100,7 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;background:var(--s
   <header>
     <span class="eyebrow">Eternal Promise · Galaxy S26 Ultra</span>
     <h1>마리안 웨딩 테마 키트</h1>
-    <p class="lede">마리안 웨딩 스킨 이미지를 올리면 S26 울트라 화면 크기(1440×3120)에 맞는 잠금화면·홈화면 배경, 웨딩 색상표, 아이콘 25개를 만들어요. 만든 파일은 Good Lock의 Theme Park에 넣어 갤럭시 테마로 써요.</p>
+    <p class="lede">하얀 드레스, 사파이어, 파란 장미, 금빛 별. 마리안 웨딩 스킨 이미지를 올리면 S26 울트라 화면 크기(1440×3120)에 맞는 잠금화면·홈화면 배경, 웨딩 색상표, 아이콘 25개를 만들어요. 만든 파일은 Good Lock의 Theme Park에 넣어 갤럭시 테마로 써요.</p>
   </header>
 
   <div class="grid">
@@ -136,11 +136,11 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;background:var(--s
           </div>
         </div>
         <div class="sliders" id="posSliders">
-          <div class="field"><label for="zoom">확대 <span class="val" id="zoomV"></span></label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
+          <div class="field"><label for="zoom">확대 <span class="val" id="zoomV"></span></label><input type="range" id="zoom" min="0.6" max="3" step="0.01" value="1"></div>
           <div class="field"><label for="fx">가로 위치 <span class="val" id="fxV"></span></label><input type="range" id="fx" min="0" max="1" step="0.005" value="0.5"></div>
           <div class="field"><label for="fy">세로 위치 <span class="val" id="fyV"></span></label><input type="range" id="fy" min="0" max="1" step="0.005" value="0.3"></div>
         </div>
-        <p class="hint">얼굴이 시계(위쪽 15~25%)와 겹치지 않게 세로 위치를 내려 주세요.</p>
+        <p class="hint">얼굴이 시계(위쪽 15~25%)와 겹치면 확대를 1배보다 작게 하고 세로 위치를 아래로 내려 보세요. 빈 곳은 같은 그림을 흐리게 채워요.</p>
       </section>
 
       <section class="panel" aria-labelledby="h-deco">
@@ -152,6 +152,7 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;background:var(--s
         </div>
         <div class="chips">
           <label class="chip"><input type="checkbox" id="lace" checked>레이스 테두리</label>
+          <label class="chip"><input type="checkbox" id="stars" checked>금빛 별</label>
           <label class="chip"><input type="checkbox" id="textOn" checked>잠금화면 문구</label>
           <label class="chip"><input type="checkbox" id="darkClock" checked>시계 글자 어둡게</label>
         </div>
@@ -167,7 +168,8 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;background:var(--s
         <div class="swatches" id="swatches"></div>
         <div class="row">
           <button class="btn ghost" type="button" id="reExtract" disabled>사진에서 다시 뽑기</button>
-          <button class="btn ghost" type="button" id="preset">기본 웨딩 색으로</button>
+          <button class="btn ghost" type="button" id="preset">마리안 사파이어</button>
+          <button class="btn ghost" type="button" id="presetBlush">블러시 핑크</button>
         </div>
       </section>
 
@@ -230,15 +232,19 @@ const ICONS = [
   ["youtube","영상","smart_display"],["recorder","녹음","mic"],["shopping","쇼핑","shopping_bag"],["nikke","NIKKE","diamond"],
   ["settings","설정","settings"]
 ];
-const PRESET = { light:"#FBF6F7", accent:"#C8708A", point:"#C4A26B", deep:"#3B2A40" };
+const PRESETS = {
+  sapphire:{ light:"#F5F8FD", accent:"#2F5FC4", point:"#C9A45C", deep:"#3A2C2A" },
+  blush:{ light:"#FBF6F7", accent:"#C8708A", point:"#C4A26B", deep:"#3B2A40" }
+};
+const PRESET = PRESETS.sapphire;
 const SLOTS = [
-  ["light","주요색","배경·퀵패널 바탕"],["accent","강조색","버튼·스위치·꽃잎"],
-  ["point","포인트색","레이스·금색 테"],["deep","글자색","글자·어두운 바탕"]
+  ["light","주요색","배경·퀵패널 바탕"],["accent","강조색","사파이어·버튼·꽃잎"],
+  ["point","포인트색","금빛 별·레이스·테"],["deep","글자색","글자·머리색·어두운 바탕"]
 ];
 
 const S = {
   img:null, imgName:"", zoom:1, fx:.5, fy:.3, veil:.35, petals:46, wash:.3,
-  lace:true, textOn:true, darkClock:true, t1:"Marian", t2:"Eternal Promise",
+  lace:true, stars:true, textOn:true, darkClock:true, t1:"Marian", t2:"Eternal Promise",
   pal:{...PRESET}, istyle:"pearl", ishape:"circle", iring:true
 };
 
@@ -322,7 +328,7 @@ function drawDefaultArt(ctx,P){
   // diamond on the left ring
   ctx.save(); ctx.translate(c1x, cy-rr-34);
   ctx.beginPath(); ctx.moveTo(-46,0); ctx.lineTo(-26,-26); ctx.lineTo(26,-26); ctx.lineTo(46,0); ctx.lineTo(0,52); ctx.closePath();
-  const dg = ctx.createLinearGradient(-46,-26,46,52); dg.addColorStop(0,"#FFFFFF"); dg.addColorStop(.5,mix(P.light,P.accent,.15)); dg.addColorStop(1,"#FFFFFF");
+  const dg = ctx.createLinearGradient(-46,-26,46,52); dg.addColorStop(0,"#FFFFFF"); dg.addColorStop(.5,mix(P.light,P.accent,.45)); dg.addColorStop(1,"#FFFFFF");
   ctx.fillStyle = dg; ctx.fill(); ctx.strokeStyle = P.point; ctx.lineWidth = 4; ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-46,0); ctx.lineTo(46,0); ctx.moveTo(-26,-26); ctx.lineTo(-12,0); ctx.lineTo(0,52); ctx.lineTo(12,0); ctx.lineTo(26,-26); ctx.moveTo(-12,0); ctx.lineTo(0,-26); ctx.lineTo(12,0);
   ctx.lineWidth = 2.5; ctx.stroke();
@@ -331,14 +337,14 @@ function drawDefaultArt(ctx,P){
   // rose cluster below the rings
   const roses = [[W*.5,H*.62,1],[W*.39,H*.635,.72],[W*.61,H*.635,.72],[W*.45,H*.665,.5],[W*.56,H*.668,.52]];
   for(const [x,y,s] of roses) leaf(ctx,x,y,s,P);
-  for(const [x,y,s] of roses) rose(ctx,x,y,s,P);
+  roses.forEach(([x,y,s],i) => rose(ctx,x,y,s,P, i%2===1));
 }
 function sparkle(ctx,x,y,s){ ctx.beginPath(); ctx.moveTo(x,y-s); ctx.quadraticCurveTo(x,y,x+s,y); ctx.quadraticCurveTo(x,y,x,y+s); ctx.quadraticCurveTo(x,y,x-s,y); ctx.quadraticCurveTo(x,y,x,y-s); ctx.fill(); }
 function leaf(ctx,x,y,s,P){ const green = mix("#7E9A84",P.deep,.15);
   for(const a of [-2.4,-.7,.9,2.5]){ ctx.save(); ctx.translate(x+Math.cos(a)*110*s,y+Math.sin(a)*60*s); ctx.rotate(a+Math.PI/2);
     petalPath(ctx,38*s,80*s); ctx.fillStyle = rgba(green,.75); ctx.fill(); ctx.restore(); } }
-function rose(ctx,x,y,s,P){
-  const base = P.accent, light = mix(P.accent,"#FFFFFF",.45);
+function rose(ctx,x,y,s,P,white){
+  const base = white ? mix(P.light,P.accent,.12) : P.accent, light = white ? "#FFFFFF" : mix(P.accent,"#FFFFFF",.45);
   for(let ring=4; ring>=0; ring--){ const n = 5+ring, rad = (20+ring*24)*s;
     for(let i=0;i<n;i++){ const a = i/n*Math.PI*2 + ring*.7; ctx.save(); ctx.translate(x+Math.cos(a)*rad*.55, y+Math.sin(a)*rad*.42); ctx.rotate(a+Math.PI/2);
       const pg = ctx.createLinearGradient(0,-rad*.6,0,rad*.6); pg.addColorStop(0,mix(base,"#000000",.12+ring*.02)); pg.addColorStop(1,light);
@@ -346,9 +352,43 @@ function rose(ctx,x,y,s,P){
   ctx.beginPath(); ctx.arc(x,y,12*s,0,Math.PI*2); ctx.fillStyle = mix(base,"#000000",.3); ctx.fill();
 }
 
+let blurCache = null;
+function blurred(img){
+  if(blurCache && blurCache.img === img) return blurCache.c;
+  const c = document.createElement("canvas"), k = 28 / Math.max(img.naturalWidth, img.naturalHeight);
+  c.width = Math.max(2, Math.round(img.naturalWidth*k)); c.height = Math.max(2, Math.round(img.naturalHeight*k));
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height); blurCache = {img, c}; return c;
+}
 function drawCover(ctx,img){
   const iw = img.naturalWidth, ih = img.naturalHeight, sc = Math.max(W/iw,H/ih)*S.zoom, dw = iw*sc, dh = ih*sc;
-  ctx.drawImage(img,(W-dw)*S.fx,(H-dh)*S.fy,dw,dh);
+  const dx = (W-dw)*S.fx, dy = (H-dh)*S.fy;
+  if(dw >= W-1 && dh >= H-1){ ctx.drawImage(img,dx,dy,dw,dh); return; }
+  // image smaller than the screen: fill with a soft, blurred copy, then fade the photo's edges into it
+  // stretch the photo's own edge rows/columns (blurred) into the empty space, so no face or body shape appears there
+  const bc = blurred(img), bw = bc.width, bh = bc.height, e = 2;
+  ctx.save(); ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bc,0,0,bw,bh,0,0,W,H);
+  if(dy > 0)    ctx.drawImage(bc,0,0,bw,e, dx,0,dw,dy+160);
+  if(dy+dh < H) ctx.drawImage(bc,0,bh-e,bw,e, dx,dy+dh-160,dw,H-dy-dh+160);
+  if(dx > 0)    ctx.drawImage(bc,0,0,e,bh, 0,dy,dx+160,dh);
+  if(dx+dw < W) ctx.drawImage(bc,bw-e,0,e,bh, dx+dw-160,dy,W-dx-dw+160,dh);
+  ctx.fillStyle = rgba(S.pal.light,.35); ctx.fillRect(0,0,W,H); ctx.restore();
+  const m = ctx.getTransform().a, o = document.createElement("canvas"); o.width = ctx.canvas.width; o.height = ctx.canvas.height;
+  const x = o.getContext("2d"); x.setTransform(m,0,0,m,0,0); x.drawImage(img,dx,dy,dw,dh);
+  x.globalCompositeOperation = "destination-out"; const f = 150;
+  const fade = (x0,y0,x1,y1,rx,ry,rw,rh) => { const g = x.createLinearGradient(x0,y0,x1,y1); g.addColorStop(0,"rgba(0,0,0,1)"); g.addColorStop(1,"rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(rx,ry,rw,rh); };
+  if(dy > 0)      fade(0,dy,0,dy+f, dx,dy,dw,f);
+  if(dy+dh < H)   fade(0,dy+dh,0,dy+dh-f, dx,dy+dh-f,dw,f);
+  if(dx > 0)      fade(dx,0,dx+f,0, dx,dy,f,dh);
+  if(dx+dw < W)   fade(dx+dw,0,dx+dw-f,0, dx+dw-f,dy,f,dh);
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(o,0,0); ctx.restore();
+}
+function drawStars(ctx,P,count,seed){
+  const r = rng(seed);
+  for(let i=0;i<count;i++){ const x = 120+r()*(W-240), y = r()*H, s = 10+r()*22;
+    if(y > H*.12 && y < H*.27 && x > W*.2 && x < W*.8) continue; // keep the clock area clean
+    ctx.save(); ctx.globalAlpha = .55+r()*.45; ctx.shadowColor = rgba(P.point,.6); ctx.shadowBlur = s;
+    ctx.fillStyle = mix(P.point,"#FFFFFF",r()*.35); sparkle(ctx,x,y,s); ctx.restore(); }
 }
 
 function drawPetals(ctx,P,count,seed){
@@ -407,6 +447,7 @@ function renderWallpaper(canvas,kind,scale){
   if(kind==="lock" && S.img && S.textOn){ const g = ctx.createLinearGradient(0,H*.6,0,H); g.addColorStop(0,rgba(P.deep,0)); g.addColorStop(1,rgba(P.deep,.45)); ctx.fillStyle=g; ctx.fillRect(0,H*.6,W,H*.4); }
   if(kind==="home" && S.wash > 0){ const g = ctx.createLinearGradient(0,H*.55,0,H); g.addColorStop(0,rgba(P.light,0)); g.addColorStop(1,rgba(P.light,S.wash*.8)); ctx.fillStyle=g; ctx.fillRect(0,H*.55,W,H*.45); }
   drawPetals(ctx,P, kind==="home" ? Math.round(S.petals*.6) : S.petals, kind==="home"?23:11);
+  if(S.stars) drawStars(ctx,P, kind==="home" ? 10 : 18, kind==="home"?41:31);
   if(S.lace) drawLace(ctx,P,scale);
   ctx.setTransform(scale,0,0,scale,0,0);
   if(kind==="lock") drawText(ctx,P);
@@ -466,7 +507,7 @@ const bindRange = (id, fmt) => { const el = $(id), out = $(id+"V"); const set = 
   set(); el.addEventListener("input", () => { set(); schedule(); }); };
 bindRange("zoom", v=>v.toFixed(2)+"배"); bindRange("fx", v=>Math.round(v*100)+"%"); bindRange("fy", v=>Math.round(v*100)+"%");
 bindRange("veil", v=>Math.round(v*100)+"%"); bindRange("petals", v=>v+"장"); bindRange("wash", v=>Math.round(v*100)+"%");
-for(const id of ["lace","textOn","darkClock","iring"]) $(id).addEventListener("change", e => { S[id] = e.target.checked; schedule(); });
+for(const id of ["lace","stars","textOn","darkClock","iring"]) $(id).addEventListener("change", e => { S[id] = e.target.checked; schedule(); });
 for(const id of ["t1","t2"]) $(id).addEventListener("input", e => { S[id] = e.target.value; schedule(); });
 document.querySelectorAll('input[name=istyle],input[name=ishape]').forEach(r => r.addEventListener("change", e => { S[e.target.name] = e.target.value; schedule(); }));
 
@@ -490,7 +531,8 @@ document.addEventListener("paste", e => { const it = [...(e.clipboardData?.items
 $("clearImg").addEventListener("click", () => { S.img = null; $("thumb").hidden = true; $("clearImg").hidden = true; $("reExtract").disabled = true;
   $("imgName").textContent = "기본 웨딩 일러스트 (예시)"; $("file").value = ""; setPosEnabled(false); S.darkClock = true; $("darkClock").checked = true; S.pal = {...PRESET}; paintSwatches(); schedule(); });
 $("reExtract").addEventListener("click", () => { if(S.img){ S.pal = extractPalette(S.img); paintSwatches(); schedule(); } });
-$("preset").addEventListener("click", () => { S.pal = {...PRESET}; paintSwatches(); schedule(); });
+$("preset").addEventListener("click", () => { S.pal = {...PRESETS.sapphire}; paintSwatches(); schedule(); });
+$("presetBlush").addEventListener("click", () => { S.pal = {...PRESETS.blush}; paintSwatches(); schedule(); });
 
 /* ---------- export ---------- */
 function status(t){ $("status").textContent = t; }
